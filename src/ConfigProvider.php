@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 namespace ELLa123\HyperfJwt;
 
-use ELLa123\HyperfJwt\Commands\GenJwtSecretCommand;
-
 class ConfigProvider
 {
     public function __invoke(): array
@@ -22,7 +20,6 @@ class ConfigProvider
             'dependencies' => [
             ],
             'commands' => [
-                GenJwtSecretCommand::class,
             ],
             'annotations' => [
                 'scan' => [
