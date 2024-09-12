@@ -19,19 +19,19 @@ return [
      * 必填
      * jwt 服务端身份标识
      */
-    'secret' => env('SIMPLE_JWT_SECRET'),
+    'secret' => env('JWT_SECRET', ''),
 
     /*
      * 可选配置
      * jwt 生命周期，单位秒，默认一天
      */
-    'ttl' => env('SIMPLE_JWT_TTL', 60 * 60 * 24),
+    'ttl' => env('JWT_TTL', 60 * 60 * 24),
 
     /*
      * 可选配置
      * 允许过期多久以内的 token 进行刷新，默认一周
      */
-    'refresh_ttl' => env('SIMPLE_JWT_REFRESH_TTL', 60 * 60 * 24 * 7),
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 60 * 60 * 24 * 7),
 
     /*
      * 可选配置
