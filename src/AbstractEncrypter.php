@@ -16,8 +16,7 @@ use ELLa123\HyperfJwt\Interfaces\Encrypter;
 
 abstract class AbstractEncrypter implements Encrypter
 {
-    /** @var string */
-    protected $secret;
+    protected string $secret;
 
     public function __construct($secret)
     {

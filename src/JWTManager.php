@@ -26,6 +26,8 @@ use Hyperf\Cache\Cache;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
+use function Hyperf\Support\make;
+
 class JWTManager
 {
     protected int $ttl;
@@ -33,7 +35,7 @@ class JWTManager
     /** @var int token 过期多久后可以被刷新,单位分钟 minutes */
     protected int $refreshTtl;
 
-    protected AbstractEncrypter $encrypter;
+    protected Encrypter $encrypter;
 
     protected Encoder $encoder;
 
@@ -72,7 +74,7 @@ class JWTManager
             return $this->cache;
         }
 
-        return $this->cache = make(CacheInterface::class);
+        return $this->cache = make(Cache::class);
     }
 
     /**
@@ -202,30 +204,33 @@ class JWTManager
         throw new SignatureException('Invalid signature');
     }
 
-    public function addBlacklist($jwt): void
-    {
-        $now = time();
-        $this->getCache()->save(
-            $this->blacklistKey($jwt),
-            $now,
-            ($jwt instanceof JWT ? ($jwt->getPayload()['iat'] || $now) : $now) + $this->getRefreshTtl() // 存到该 token 超过 refresh 即可
-        );
-    }
-
     /**
      * @param mixed $jwt
      * @throws InvalidArgumentException
      */
-    public function removeBlacklist($jwt)
+    public function addBlacklist($jwt): void
+    {
+        $now = time();
+        $this->getCache()->set(
+            key: $this->blacklistKey($jwt),
+            value: $now,
+            // 存到该 token 超过 refresh 即可
+            ttl: ($jwt instanceof JWT ? ($jwt->getPayload()['iat'] || $now) : $now) + $this->getRefreshTtl()
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function removeBlacklist(JWT|string $jwt): bool
     {
         return $this->getCache()->delete($this->blacklistKey($jwt));
     }
 
     /**
-     * @param mixed $jwt
      * @throws InvalidArgumentException
      */
-    public function hasBlacklist($jwt)
+    public function hasBlacklist(JWT|string $jwt): bool
     {
         return $this->getCache()->has($this->blacklistKey($jwt));
     }

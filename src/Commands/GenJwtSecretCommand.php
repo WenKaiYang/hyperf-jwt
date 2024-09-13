@@ -15,6 +15,7 @@ namespace ELLa123\HyperfJwt\Commands;
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
 use Hyperf\Stringable\Str;
+
 use function Hyperf\Support\env;
 
 #[Command]

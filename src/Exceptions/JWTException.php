@@ -16,13 +16,9 @@ use ELLa123\HyperfJwt\JWT;
 
 class JWTException extends \Exception
 {
-    /** @var JWT */
-    protected $jwt;
+    protected JWT $jwt;
 
-    /**
-     * @return static
-     */
-    public function setJwt(JWT $jwt)
+    public function setJwt(JWT $jwt): static
     {
         $this->jwt = $jwt;
 
