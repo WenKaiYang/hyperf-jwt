@@ -11,8 +11,6 @@ composer require ella123/hyperf-jwt
 ## 如何使用 ？
 
 ```php
-require 'vendor/autoload.php';
-
 use ELLa123\HyperfJwt\JWTManager;
 use ELLa123\HyperfJwt\JWT;
 use ELLa123\HyperfJwt\Encoders;
