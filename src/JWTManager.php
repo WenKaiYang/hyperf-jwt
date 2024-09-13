@@ -233,7 +233,7 @@ class JWTManager
 
     public function hasBlacklist($jwt)
     {
-        return $this->getCache()->contains($this->blacklistKey($jwt));
+        return $this->getCache()->has($this->blacklistKey($jwt));
     }
 
     /**
