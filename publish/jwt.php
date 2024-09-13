@@ -11,7 +11,7 @@ declare(strict_types=1);
  */
 use ELLa123\HyperfJwt\Encoders;
 use ELLa123\HyperfJwt\EncryptAdapters as Encrypter;
-use Psr\SimpleCache\CacheInterface;
+use Hyperf\Cache\Cache;
 
 return [
     /*
@@ -61,7 +61,7 @@ return [
      * 缓存类，用于黑名单
      */
     'cache' => function () {
-        return make(CacheInterface::class);
+        return make(Cache::class);
     },
 
     /*

@@ -56,8 +56,8 @@ class JWTManager
         $this->resolveEncrypter($config['default'] ?? PasswordHashEncrypter::class);
 
         $this->encoder = $config['encoder'] ?? new Base64UrlSafeEncoder();
-        $this->cache = $config['cache'] ?? make(CacheInterface::class);
-        $this->ttl = $config['ttl'] ?? 60 * 60;
+        $this->cache = $config['cache'] ?? make(Cache::class);
+        $this->ttl = $config['ttl'] ?? 60 * 60 * 2;
         $this->refreshTtl = $config['refresh_ttl'] ?? 60 * 60 * 24 * 7; // 单位秒，默认一周内可以刷新
     }
 
