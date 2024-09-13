@@ -12,60 +12,35 @@ declare(strict_types=1);
 
 namespace ELLa123\HyperfJwt\Commands;
 
+use Hyperf\Command\Annotation\Command;
+use Hyperf\Command\Command as HyperfCommand;
 use Hyperf\Utils\Str;
 
-class GenJwtSecretCommand extends AbstractGenCommand
+#[Command]
+class GenJwtSecretCommand extends HyperfCommand
 {
     protected $name = 'gen:jwt-secret';
 
-    protected $description = 'Set the JWT secret key used to sign the tokens';
-
     public function handle(): void
     {
-        $key = base64_encode(random_bytes(64));
+        $this->gen('JWT_SECRET');
+    }
 
-        if ($this->getOption('show')) {
-            $this->comment($key);
-            return;
-        }
-
-        if (file_exists($path = $this->envFilePath()) === false) {
-            $this->displayKey($key);
-            return;
-        }
-
-        if (Str::contains(file_get_contents($path), 'JWT_SECRET') === false) {
-            file_put_contents($path, "\nJWT_SECRET={$key}\n", FILE_APPEND);
+    public function gen($key, ?string $value = null): void
+    {
+        if (empty(env($key))) {
+            file_put_contents(
+                BASE_PATH . '/.env',
+                sprintf(
+                    PHP_EOL . '%s=%s',
+                    $key,
+                    $value ?? hash('sha256', Str::random(32))
+                ),
+                FILE_APPEND
+            );
+            $this->info($key . ' 已生成!');
         } else {
-            if ($this->getOption('always-no')) {
-                $this->comment('Secret key already exists. Skipping...');
-                return;
-            }
-
-            if ($this->isConfirmed() === false) {
-                $this->comment('Phew... No changes were made to your secret key.');
-                return;
-            }
-
-            file_put_contents($path, preg_replace(
-                "~JWT_SECRET=[^\n]*~",
-                "JWT_SECRET=\"{$key}\"",
-                file_get_contents($path)
-            ));
+            $this->info($key . ' 已存在!');
         }
-
-        $this->displayKey($key);
-    }
-
-    protected function displayKey(string $key): void
-    {
-        $this->info("JWT secret [<comment>{$key}</comment>] (base64 encoded) set successfully.");
-    }
-
-    protected function isConfirmed(): bool
-    {
-        return $this->getOption('force') || $this->confirm(
-            'Are you sure you want to override the key? This will invalidate all existing tokens.'
-        );
     }
 }
