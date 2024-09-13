@@ -14,18 +14,13 @@ namespace ELLa123\HyperfJwt;
 
 class JWT
 {
-    /** @var array */
-    protected $headers = [
+    protected array $headers = [
         'typ' => 'jwt',
     ];
 
-    /** @var array */
-    protected $payload = [];
+    protected array $payload = [];
 
-    /**
-     * @var JWTManager
-     */
-    protected $manager;
+    protected JWTManager $manager;
 
     /**
      * JWT constructor.

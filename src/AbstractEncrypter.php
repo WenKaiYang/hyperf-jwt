@@ -16,8 +16,7 @@ use ELLa123\HyperfJwt\Interfaces\Encrypter;
 
 abstract class AbstractEncrypter implements Encrypter
 {
-    /** @var string */
-    protected $secret;
+    protected string $secret;
 
     public function __construct($secret)
     {
@@ -36,12 +35,8 @@ abstract class AbstractEncrypter implements Encrypter
 
     /**
      * Get the number of bytes in cryptographic strings.
-     *
-     * @param string $str
-     *
-     * @return int
      */
-    public static function safeStrlen($str)
+    public static function safeStrlen(string $str): int
     {
         if (\function_exists('mb_strlen')) {
             return \mb_strlen($str, '8bit');

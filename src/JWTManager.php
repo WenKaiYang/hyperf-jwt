@@ -33,7 +33,7 @@ class JWTManager
     /** @var int token 过期多久后可以被刷新,单位分钟 minutes */
     protected int $refreshTtl;
 
-    protected AbstractEncrypter $encrypter;
+    protected Encrypter $encrypter;
 
     protected Encoder $encoder;
 
@@ -66,13 +66,13 @@ class JWTManager
         return $this->ttl;
     }
 
-    public function getCache(): Cache
+    public function getCache(): CacheInterface
     {
         if ($this->cache instanceof Cache) {
             return $this->cache;
         }
 
-        return $this->cache = make(CacheInterface::class);
+        return $this->cache = make(Cache::class);
     }
 
     /**
@@ -202,10 +202,13 @@ class JWTManager
         throw new SignatureException('Invalid signature');
     }
 
-    public function addBlacklist($jwt): void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function addBlacklist(JWT|string $jwt): void
     {
         $now = time();
-        $this->getCache()->save(
+        $this->getCache()->set(
             $this->blacklistKey($jwt),
             $now,
             ($jwt instanceof JWT ? ($jwt->getPayload()['iat'] || $now) : $now) + $this->getRefreshTtl() // 存到该 token 超过 refresh 即可
@@ -213,19 +216,17 @@ class JWTManager
     }
 
     /**
-     * @param mixed $jwt
      * @throws InvalidArgumentException
      */
-    public function removeBlacklist($jwt)
+    public function removeBlacklist(JWT|string $jwt): bool
     {
         return $this->getCache()->delete($this->blacklistKey($jwt));
     }
 
     /**
-     * @param mixed $jwt
      * @throws InvalidArgumentException
      */
-    public function hasBlacklist($jwt)
+    public function hasBlacklist(JWT|string $jwt): bool
     {
         return $this->getCache()->has($this->blacklistKey($jwt));
     }
