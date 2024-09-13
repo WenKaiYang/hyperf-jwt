@@ -21,6 +21,12 @@ class GenJwtSecretCommand extends HyperfCommand
 {
     protected $name = 'gen:jwt-secret';
 
+    public function configure()
+    {
+        parent::configure();
+        $this->setDescription('Create a new jwt secret');
+    }
+
     public function handle(): void
     {
         $this->gen('JWT_SECRET');
