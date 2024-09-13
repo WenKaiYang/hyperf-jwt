@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of qbhy/simple-jwt.
+ * This file is part of Hyperf.
  *
- * @link     https://github.com/qbhy/simple-jwt
- * @document https://github.com/qbhy/simple-jwt/blob/master/README.md
- * @contact  qbhy0715@qq.com
- * @license  https://github.com/qbhy/simple-jwt/blob/master/LICENSE
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
 namespace ELLa123\HyperfJwt;
@@ -70,7 +70,7 @@ class JWTManager
         $this->resolveEncrypter($config['default'] ?? PasswordHashEncrypter::class);
 
         $this->encoder = $config['encoder'] ?? new Base64UrlSafeEncoder();
-        $this->cache = make($config['cache'] ?? CacheInterface::class);
+        $this->cache = $config['cache'] ?? make(CacheInterface::class);
         $this->ttl = $config['ttl'] ?? 60 * 60;
         $this->refreshTtl = $config['refresh_ttl'] ?? 60 * 60 * 24 * 7; // 单位秒，默认一周内可以刷新
     }
@@ -158,8 +158,6 @@ class JWTManager
 
     /**
      * 解析一个jwt.
-     * @param string $token
-     * @return JWT
      * @throws InvalidTokenException
      * @throws SignatureException
      * @throws TokenBlacklistException
@@ -189,8 +187,8 @@ class JWTManager
 
     /**
      * 单纯的解析一个jwt.
-     * @throws Exceptions\InvalidTokenException
-     * @throws Exceptions\SignatureException
+     * @throws InvalidTokenException
+     * @throws SignatureException
      */
     public function justParse(string $token): JWT
     {
@@ -207,7 +205,7 @@ class JWTManager
 
         $signatureString = "{$arr[0]}.{$arr[1]}";
 
-        if (!is_array($headers) || !is_array($payload)) {
+        if (! is_array($headers) || ! is_array($payload)) {
             throw new InvalidTokenException('Invalid token');
         }
 
@@ -239,16 +237,13 @@ class JWTManager
     }
 
     /**
-     * @param JWT $jwt
-     * @param bool $force
-     * @return JWT
      * @throws TokenRefreshExpiredException
      */
     public function refresh(JWT $jwt, bool $force = false): JWT
     {
         $payload = $jwt->getPayload();
 
-        if (!$force && isset($payload['iat'])) {
+        if (! $force && isset($payload['iat'])) {
             $refreshExp = $payload['iat'] + $this->getRefreshTtl();
 
             if ($refreshExp <= time()) {
@@ -269,7 +264,6 @@ class JWTManager
 
     /**
      * @param JWT|string $jwt
-     * @return string
      */
     protected function blacklistKey($jwt): string
     {
@@ -280,7 +274,7 @@ class JWTManager
 
     protected function verifyConfig(array $config): void
     {
-        if (!isset($config['secret'])) {
+        if (! isset($config['secret'])) {
             throw new \InvalidArgumentException('Secret is required.');
         }
     }

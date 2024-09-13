@@ -1,18 +1,17 @@
 <?php
 
 declare(strict_types=1);
-
 /**
- * This file is part of qbhy/simple-jwt.
+ * This file is part of Hyperf.
  *
- * @link     https://github.com/qbhy/simple-jwt
- * @document https://github.com/qbhy/simple-jwt/blob/master/README.md
- * @contact  qbhy0715@qq.com
- * @license  https://github.com/qbhy/simple-jwt/blob/master/LICENSE
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 use ELLa123\HyperfJwt\Encoders;
 use ELLa123\HyperfJwt\EncryptAdapters as Encrypter;
+use Psr\SimpleCache\CacheInterface;
 
 return [
     /*
@@ -61,7 +60,9 @@ return [
      * 可选配置
      * 缓存类，用于黑名单
      */
-    'cache' => \Psr\SimpleCache\CacheInterface::class,
+    'cache' => function () {
+        return make(CacheInterface::class);
+    },
 
     /*
      * 可选配置
