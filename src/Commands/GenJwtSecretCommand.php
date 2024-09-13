@@ -14,14 +14,15 @@ namespace ELLa123\HyperfJwt\Commands;
 
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
-use Hyperf\Utils\Str;
+use Hyperf\Stringable\Str;
+use function Hyperf\Support\env;
 
 #[Command]
 class GenJwtSecretCommand extends HyperfCommand
 {
-    protected $name = 'gen:jwt-secret';
+    protected ?string $name = 'gen:jwt-secret';
 
-    public function configure()
+    public function configure(): void
     {
         parent::configure();
         $this->setDescription('Create a new jwt secret');
