@@ -24,41 +24,27 @@ use ELLa123\HyperfJwt\Interfaces\Encoder;
 use ELLa123\HyperfJwt\Interfaces\Encrypter;
 use Hyperf\Cache\Cache;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class JWTManager
 {
-    protected $ttl;
+    protected int $ttl;
 
     /** @var int token 过期多久后可以被刷新,单位分钟 minutes */
-    protected $refreshTtl;
+    protected int $refreshTtl;
 
-    /** @var AbstractEncrypter */
-    protected $encrypter;
+    protected AbstractEncrypter $encrypter;
 
-    /** @var Encoder */
-    protected $encoder;
+    protected Encoder $encoder;
 
-    /** @var Cache */
-    protected $cache;
+    protected CacheInterface $cache;
 
-    /**
-     * @var array
-     */
-    protected $drivers;
+    protected array $drivers;
 
-    /**
-     * @var string
-     */
-    protected $secret;
+    protected string $secret;
 
-    /**
-     * @var string
-     */
-    protected $prefix;
+    protected string $prefix;
 
-    /**
-     * JWTManager constructor.
-     */
     public function __construct(array $config)
     {
         $this->verifyConfig($config);
@@ -162,7 +148,7 @@ class JWTManager
      * @throws SignatureException
      * @throws TokenBlacklistException
      * @throws TokenExpiredException
-     * @throws TokenNotActiveException
+     * @throws InvalidArgumentException|TokenNotActiveException
      */
     public function parse(string $token): JWT
     {
@@ -226,11 +212,19 @@ class JWTManager
         );
     }
 
+    /**
+     * @param mixed $jwt
+     * @throws InvalidArgumentException
+     */
     public function removeBlacklist($jwt)
     {
         return $this->getCache()->delete($this->blacklistKey($jwt));
     }
 
+    /**
+     * @param mixed $jwt
+     * @throws InvalidArgumentException
+     */
     public function hasBlacklist($jwt)
     {
         return $this->getCache()->has($this->blacklistKey($jwt));
@@ -262,10 +256,7 @@ class JWTManager
         return $this;
     }
 
-    /**
-     * @param JWT|string $jwt
-     */
-    protected function blacklistKey($jwt): string
+    protected function blacklistKey(JWT|string $jwt): string
     {
         $jti = $jwt instanceof JWT ? ($jwt->getPayload()['jti'] ?? md5($jwt->token())) : md5($jwt);
 
