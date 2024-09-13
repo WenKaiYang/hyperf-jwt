@@ -205,10 +205,9 @@ class JWTManager
     }
 
     /**
-     * @param mixed $jwt
      * @throws InvalidArgumentException
      */
-    public function addBlacklist($jwt): void
+    public function addBlacklist(JWT|string $jwt): void
     {
         $now = time();
         $this->getCache()->set(
