@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace ELLa123\HyperfJwt;
 
+use Closure;
 use ELLa123\HyperfJwt\Encoders\Base64UrlSafeEncoder;
 use ELLa123\HyperfJwt\EncryptAdapters\PasswordHashEncrypter;
 use ELLa123\HyperfJwt\Exceptions\InvalidTokenException;
@@ -37,8 +38,7 @@ class JWTManager
 
     protected Encoder $encoder;
 
-    /** @var CacheInterface */
-    protected mixed $cache;
+    protected CacheInterface $cache;
 
     protected array $drivers;
 
@@ -57,7 +57,16 @@ class JWTManager
         $this->resolveEncrypter($config['default'] ?? PasswordHashEncrypter::class);
 
         $this->encoder = $config['encoder'] ?? new Base64UrlSafeEncoder();
-        $this->cache = $config['cache'] ?? make(Cache::class);
+        // 获取缓存配置
+        if ($config['cache'] instanceof Closure) {
+            $this->cache = $config['cache']();
+        } elseif (is_string($config['cache'])) {
+            $this->cache = make($config['cache']);
+        } elseif ($config['cache'] instanceof CacheInterface) {
+            $this->cache = $config['cache'];
+        } else {
+            $this->cache = make(Cache::class);
+        }
         $this->ttl = $config['ttl'] ?? 60 * 60 * 2;
         $this->refreshTtl = $config['refresh_ttl'] ?? 60 * 60 * 24 * 7; // 单位秒，默认一周内可以刷新
     }
