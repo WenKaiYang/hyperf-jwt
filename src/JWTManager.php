@@ -37,7 +37,8 @@ class JWTManager
 
     protected Encoder $encoder;
 
-    protected CacheInterface $cache;
+    /** @var CacheInterface */
+    protected mixed $cache;
 
     protected array $drivers;
 
@@ -191,7 +192,7 @@ class JWTManager
 
         $signatureString = "{$arr[0]}.{$arr[1]}";
 
-        if (! is_array($headers) || ! is_array($payload)) {
+        if (!is_array($headers) || !is_array($payload)) {
             throw new InvalidTokenException('Invalid token');
         }
 
@@ -238,7 +239,7 @@ class JWTManager
     {
         $payload = $jwt->getPayload();
 
-        if (! $force && isset($payload['iat'])) {
+        if (!$force && isset($payload['iat'])) {
             $refreshExp = $payload['iat'] + $this->getRefreshTtl();
 
             if ($refreshExp <= time()) {
@@ -266,7 +267,7 @@ class JWTManager
 
     protected function verifyConfig(array $config): void
     {
-        if (! isset($config['secret'])) {
+        if (!isset($config['secret'])) {
             throw new \InvalidArgumentException('Secret is required.');
         }
     }
