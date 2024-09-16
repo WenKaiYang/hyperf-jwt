@@ -24,6 +24,7 @@ use ELLa123\HyperfJwt\Exceptions\TokenRefreshExpiredException;
 use ELLa123\HyperfJwt\Interfaces\Encoder;
 use ELLa123\HyperfJwt\Interfaces\Encrypter;
 use Hyperf\Cache\Cache;
+use Hyperf\Redis\Redis;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -60,8 +61,8 @@ class JWTManager
 
         $this->encoder = $config['encoder'] ?? new Base64UrlSafeEncoder();
         // 获取缓存配置
-        if ($config['cache'] instanceof Closure) {
-            $this->cache = $config['cache']();
+        if (is_callable($config['cache'])) {
+            $this->cache = call_user_func_array($config['cache'], []);
         } elseif (is_string($config['cache'])) {
             $this->cache = make($config['cache']);
         } elseif ($config['cache'] instanceof CacheInterface) {
