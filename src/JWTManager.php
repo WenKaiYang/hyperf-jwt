@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace ELLa123\HyperfJwt;
 
-use Closure;
 use ELLa123\HyperfJwt\Encoders\Base64UrlSafeEncoder;
 use ELLa123\HyperfJwt\EncryptAdapters\PasswordHashEncrypter;
 use ELLa123\HyperfJwt\Exceptions\InvalidTokenException;
@@ -29,10 +28,14 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class JWTManager
 {
+    /** 令牌有效时长 */
     protected int $ttl;
 
-    /** @var int token 过期多久后可以被刷新,单位分钟 minutes */
+    /** 令牌有效刷新时长 */
     protected int $refreshTtl;
+
+    /** 令牌过度时长 */
+    protected int $transitionalTtl;
 
     protected Encrypter $encrypter;
 
@@ -69,6 +72,7 @@ class JWTManager
         }
         $this->ttl = $config['ttl'] ?? 60 * 60 * 2;
         $this->refreshTtl = $config['refresh_ttl'] ?? 60 * 60 * 24 * 7; // 单位秒，默认一周内可以刷新
+        $this->transitionalTtl = $config['transitional_ttl'] ?? 60 * 5; // 单位秒，默认五分钟内可以继续使用旧token
     }
 
     public function getTtl(): int
@@ -99,6 +103,11 @@ class JWTManager
     public function getRefreshTtl(): int
     {
         return $this->refreshTtl;
+    }
+
+    public function getTransitionalTtl(): int
+    {
+        return $this->transitionalTtl;
     }
 
     /**
@@ -146,9 +155,9 @@ class JWTManager
         return [
             'sub' => '1',
             'iss' => 'http://' . ($_SERVER['SERVER_NAME'] ?? '') . ':' . ($_SERVER['SERVER_PORT'] ?? '') . ($_SERVER['REQUEST_URI'] ?? ''),
-            'exp' => $timestamp + $this->getTtl(),
-            'iat' => $timestamp,
-            'nbf' => $timestamp,
+            'exp' => $timestamp + $this->getTtl(), // 过期时间，表示令牌的有效截止时间。
+            'iat' => $timestamp, // 令牌的签发时间，表示该令牌是什么时候被签发的。
+            'nbf' => $timestamp, // 在此时间之前，令牌不能被接受处理
         ];
     }
 
@@ -201,7 +210,7 @@ class JWTManager
 
         $signatureString = "{$arr[0]}.{$arr[1]}";
 
-        if (!is_array($headers) || !is_array($payload)) {
+        if (! is_array($headers) || ! is_array($payload)) {
             throw new InvalidTokenException('Invalid token');
         }
 
@@ -238,7 +247,11 @@ class JWTManager
      */
     public function hasBlacklist(JWT|string $jwt): bool
     {
-        return $this->getCache()->has($this->blacklistKey($jwt));
+        if (! $addTime = $this->getCache()->get($this->blacklistKey($jwt))) {
+            return false;
+        }
+
+        return ($addTime + $this->getTransitionalTtl()) < time();
     }
 
     /**
@@ -248,7 +261,7 @@ class JWTManager
     {
         $payload = $jwt->getPayload();
 
-        if (!$force && isset($payload['iat'])) {
+        if (! $force && isset($payload['iat'])) {
             $refreshExp = $payload['iat'] + $this->getRefreshTtl();
 
             if ($refreshExp <= time()) {
@@ -276,7 +289,7 @@ class JWTManager
 
     protected function verifyConfig(array $config): void
     {
-        if (!isset($config['secret'])) {
+        if (! isset($config['secret'])) {
             throw new \InvalidArgumentException('Secret is required.');
         }
     }

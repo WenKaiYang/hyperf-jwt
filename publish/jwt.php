@@ -34,6 +34,12 @@ return [
 
     /*
      * 可选配置
+     * 允许多就以内的 token 失效还访问，默认五分钟
+     */
+    'transitional_ttl' => env('JWT_TRANSITIONAL_TTL', 60 * 5),
+
+    /*
+     * 可选配置
      * 默认使用的加密类
      */
     'default' => Encrypter\PasswordHashEncrypter::class,
