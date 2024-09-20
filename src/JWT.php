@@ -60,4 +60,9 @@ class JWT
     {
         return $this->payload;
     }
+
+    public function getTokenExpires(): int
+    {
+        return (int) ($this->getPayload()['exp'] ?? 0);
+    }
 }
